@@ -1,0 +1,49 @@
+pragma solidity ^0.8.4;
+
+interface IReceiver {
+    function getNumber() external view returns(uint256);
+}
+contract stageGame{
+    mapping (address => bool) public flag;
+    mapping (address => bool) public isStage1Completed;
+
+    function stage1() external {
+        uint size;
+        address addr = msg.sender;
+        assembly { size := extcodesize(addr) }
+        require(size == 0,"EOA must!");
+        isStage1Completed[msg.sender] = true;
+    }
+
+    function stage2(uint _guess) external {
+        require(isStage1Completed[msg.sender],"You should complete stage1 first!");
+        uint number = block.timestamp % 100 + 1;
+        require(number == _guess, "Wrong number!");
+        _stage3();
+    }
+
+    function _stage3() private {
+        uint size;
+        address addr = msg.sender;
+        assembly { size := extcodesize(addr) }
+        require(size > 0,"Contract must!");
+        uint256 number1;
+        uint256 number2;
+        (bool success,bytes memory data1) = addr.staticcall(abi.encodeWithSignature("getNumber()"));
+        require(success,"First call failed!");
+        number1 = abi.decode(data1, (uint256));
+
+        (bool success2,bytes memory data2) = addr.call(abi.encodeWithSignature("getNumber()"));
+        require(success2,"Second call failed!");
+        number2 = abi.decode(data2, (uint256));
+        require(number1 != number2, "Must return different Number!");
+
+        flag[tx.origin] = true;
+    }
+
+
+    function check(address addr) external view returns(bool){
+        return flag[addr];
+    }
+
+}
