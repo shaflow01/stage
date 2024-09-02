@@ -8,7 +8,7 @@ from eth_account import Account
 from gevent import pywsgi
 
 app = Flask(__name__)
-w3 = Web3(HTTPProvider("https://sepolia.infura.io/v3/e498e6b828c740f7aed4b1f211a903a6"))
+w3 = Web3(HTTPProvider("ETH_PROVIDER"))
 
 
 contractAddress = "0x49D80B38E0BF21611AF2CF93A404A4DCF1A24FD2"
